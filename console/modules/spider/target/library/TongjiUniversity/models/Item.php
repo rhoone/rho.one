@@ -2,7 +2,7 @@
 
 namespace console\modules\spider\target\library\TongjiUniversity\models;
 
-use vistart\Models\models\BaseEntityModel;
+use rhosocial\base\Models\models\BaseEntityModel;
 use Yii;
 
 /**
@@ -28,7 +28,7 @@ class Item extends BaseEntityModel
 
     public function init()
     {
-        $this->queryClass = ItemQuery::className();
+        $this->queryClass = ItemQuery::class;
         parent::init();
     }
 
@@ -50,7 +50,7 @@ class Item extends BaseEntityModel
             [['marc_no', 'barcode'], 'string', 'max' => 20],
             [['call_no'], 'string', 'max' => 64],
             [['volume_period', 'position', 'status'], 'string', 'max' => 255],
-            [['marc_no'], 'exist', 'skipOnError' => true, 'targetClass' => Marc::className(), 'targetAttribute' => ['marc_no' => 'marc_no']],
+            [['marc_no'], 'exist', 'skipOnError' => true, 'targetClass' => Marc::class, 'targetAttribute' => ['marc_no' => 'marc_no']],
         ]);
     }
 
@@ -77,6 +77,6 @@ class Item extends BaseEntityModel
      */
     public function getMarc()
     {
-        return $this->hasOne(Marc::className(), ['marc_no' => 'marc_no']);
+        return $this->hasOne(Marc::class, ['marc_no' => 'marc_no']);
     }
 }

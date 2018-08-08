@@ -2,7 +2,7 @@
 
 namespace console\modules\spider\target\library\TongjiUniversity\models;
 
-use vistart\Models\models\BaseEntityModel;
+use rhosocial\base\Models\models\BaseEntityModel;
 use Yii;
 
 /**
@@ -41,7 +41,7 @@ class Marc extends BaseEntityModel
 
     public function init()
     {
-        $this->queryClass = MarcQuery::className();
+        $this->queryClass = MarcQuery::class;
         parent::init();
     }
 

@@ -66,7 +66,7 @@ class LibraryController extends \yii\console\Controller
         }
         $duration = time() - $timestamp;
         $datetime = date('Y-m-d, H:i:s');
-        echo "$result primary record(s) done (at $datetime). Elapsed: $duration (seconds).\r\n";
+        echo "$result primary record(s) done (at $datetime, GMT). Elapsed: $duration (seconds).\r\n";
     }
 
     public function actionFind($target, $identity)

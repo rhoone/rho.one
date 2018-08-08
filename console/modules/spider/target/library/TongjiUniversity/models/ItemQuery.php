@@ -7,7 +7,7 @@ namespace console\modules\spider\target\library\TongjiUniversity\models;
  *
  * @see Item
  */
-class ItemQuery extends \vistart\Models\queries\BaseEntityQuery
+class ItemQuery extends \rhosocial\base\Models\queries\BaseEntityQuery
 {
     
 }

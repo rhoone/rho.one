@@ -7,7 +7,7 @@ namespace console\modules\spider\target\library\TongjiUniversity\models;
  *
  * @see Marc
  */
-class MarcQuery extends \vistart\Models\queries\BaseEntityQuery
+class MarcQuery extends \rhosocial\base\Models\queries\BaseEntityQuery
 {
     
 }

@@ -6,19 +6,18 @@
  * | |/ // /(__  )  / / / /| || |     | |
  * |___//_//____/  /_/ /_/ |_||_|     |_|
  * @link https://vistart.name/
- * @copyright Copyright (c) 2016 vistart
+ * @copyright Copyright (c) 2016-2018 vistart
  * @license https://vistart.name/license/
  */
 
 namespace console\modules\spider\target\library;
 
-use console\modules\spider\target\library\LibraryTarget;
 use console\modules\spider\target\library\TongjiUniversity\models\Item;
 use console\modules\spider\target\library\TongjiUniversity\models\Marc;
 use Sunra\PhpSimple\HtmlDomParser;
 
 /**
- * Description of TongjiUniversity
+ * 同济大学图书馆页面描述和抓取。
  *
  * @author vistart <i@vistart.name>
  */
@@ -29,12 +28,18 @@ class TongjiUniversity extends LibraryTarget
     public $relativeUrl = '/opac/item.php';
     public $identityParam = 'marc_no';
     public $identityFormat = '%010s';
-    public $identityStart = 2326677;
+    public $identityStart = 1;
     public $identityTotal = 1;
     public $marcSelector = '#item_detail .booklist';
     public $bookSelector = 'div#tabs2 table#item tbody .whitetext';
     public $marcNo;
 
+    /**
+     * 获取机读目录编号。
+     * @param null|int $identity 编号
+     * 若此参数为空，则获取当前编号值；若不为空，则获取下一个编号值。
+     * @return string
+     */
     public function getMarcNo($identity = null)
     {
         if ($identity !== null) {
@@ -43,6 +48,11 @@ class TongjiUniversity extends LibraryTarget
         return $this->marcNo;
     }
 
+    /**
+     * 获取下一个绝对地址。
+     * @param null|array $params 参数。此参数应当为键值对，以帮助确定下一个地址。
+     * @return bool|string 若 $params 参数为空，则返回 false；否则为下一个绝对地址。
+     */
     public function getNextAbsoluteUrl(&$params = null)
     {
         if (!empty($params) && is_array($params) && array_key_exists($this->identityParam, $params)) {
@@ -52,45 +62,75 @@ class TongjiUniversity extends LibraryTarget
         return false;
     }
 
+    /**
+     * 提取机读目录编号。
+     * @param $dom
+     * @return mixed
+     */
     public function extractMarc($dom)
     {
         return $dom->find($this->marcSelector);
     }
 
+    /**
+     * 提取 ISBN。
+     * @param $dom
+     * @return array|void
+     */
     public function extractISBN($dom)
     {
         return $this->extractCommonInfo($dom);
     }
 
+    /**
+     * 提取价格。
+     * @param $dom
+     */
     public function extractPrice($dom)
     {
         
     }
 
+    /**
+     * 提取 ISBN 和价格。
+     * @param $dom
+     * @return array
+     */
     public function extractISBNAndPrice($dom)
     {
         $contents = $dom->find('dd');
         $result = ['isbn' => [], 'price' => []];
         foreach ($contents as $content) {
             $componds = explode('/', $content->text());
-            $result['isbn'][] = $this->unicode_decode(str_replace(';', '', (str_replace('&#x', '\u', trim($componds[0])))));
-            $result['price'][] = $this->unicode_decode(str_replace(';', '', (str_replace('&#x', '\u', trim(end($componds))))));
+            $result['isbn'][] = $this->gbk_decode(trim($componds[0]));
+            $result['price'][] = $this->gbk_decode(trim(end($componds)));
         }
         return $result;
     }
 
+    /**
+     * 提取标题。
+     * @param $dom
+     * @return array|void
+     */
     public function extractTitle($dom)
     {
         return $this->extractCommonInfo($dom);
     }
 
+    /**
+     * 提取标题，不含作者。
+     * @param $dom
+     * @return array
+     */
     public function extractTitleExceptAuthor($dom)
     {
         $contents = $dom->find('dd');
         $result = [];
         foreach ($contents as $content) {
+            print_r($this->gbk_decode($content->text()) . "\n");
             $componds = explode('/', $content->text());
-            $result[] = $this->unicode_decode(str_replace(';', '', (str_replace('&#x', '\u', trim($componds[0])))));
+            $result[] = $this->gbk_decode($componds[0]);
         }
         return $result;
     }
@@ -145,16 +185,26 @@ class TongjiUniversity extends LibraryTarget
         return $this->extractCommonInfo($dom);
     }
 
+    /**
+     * 提取通用信息。
+     * @param $dom
+     * @return array|void
+     */
     public function extractCommonInfo($dom)
     {
         $contents = $dom->find('dd');
         $result = [];
         foreach ($contents as $content) {
-            $result[] = $this->unicode_decode(str_replace(';', '', (str_replace('&#x', '\u', trim($content->text())))));
+            $result[] = $this->gbk_decode(trim($content->text()));
         }
         return $result;
     }
 
+    /**
+     * 组合机读信息。
+     * @param $item
+     * @return array|Marc|null|\yii\db\ActiveRecord
+     */
     public function populateMarc($item)
     {
         $model = Marc::find()->where(['marc_no' => $this->getMarcNo()])->one();
@@ -230,11 +280,21 @@ class TongjiUniversity extends LibraryTarget
         return $model;
     }
 
+    /**
+     * 提取馆藏数目信息。
+     * @param $dom
+     * @return mixed
+     */
     public function extractBooks($dom)
     {
         return $dom->find($this->bookSelector);
     }
 
+    /**
+     * 组合馆藏数目信息。
+     * @param $books
+     * @return array
+     */
     public function populateBooks($books)
     {
         $items = [];
@@ -262,6 +322,10 @@ class TongjiUniversity extends LibraryTarget
         return $items;
     }
 
+    /**
+     * 修改配置。
+     * @param $config
+     */
     protected function changeConfig($config)
     {
         if (!is_array($config)) {
@@ -281,6 +345,12 @@ class TongjiUniversity extends LibraryTarget
         }
     }
 
+    /**
+     * 抓取
+     * @param null $config
+     * @return int|mixed
+     * @throws \yii\db\Exception
+     */
     public function crawl($config = null)
     {
         $this->changeConfig($config);
@@ -292,6 +362,7 @@ class TongjiUniversity extends LibraryTarget
             echo $this->getMarcNo($params[$this->identityParam]) . ":\r\n";
             $url = $this->getNextAbsoluteUrl($params);
             $dom = static::getHtml($url);
+            self::writeFile($dom,  "spider/Library/TongjiUniversity/" . $this->getMarcNo() . ".html");
             if (empty($dom)) {
                 $emptyCounter++;
                 $counter++;
@@ -365,16 +436,18 @@ class TongjiUniversity extends LibraryTarget
     {
         $counter = 0;
         retry:
+        $sleep = 1;
         try {
-            $dom = HtmlDomParser::file_get_html($url);
+            $dom = HtmlDomParser::file_get_html($url, false, null, 0);
             if ($counter > 0) {
                 echo "Retried successfully!\r\n";
             }
         } catch (\Exception $ex) {
             echo "Error occured at " . date('Y-m-d H:i:s') . "\r\n";
             echo $ex->getMessage() . "\r\n";
-            echo "Sleep 1 second:\r\n";
-            sleep(1);
+            $sleep *= $counter;
+            echo "Sleep $sleep second:\r\n";
+            sleep($sleep);
             if ($counter < 5) {
                 $counter++;
                 echo "Retry $counter:\r\n";
@@ -386,30 +459,83 @@ class TongjiUniversity extends LibraryTarget
         return $dom;
     }
 
-    private function unicode_decode($name)
+    /**
+     * 写入文件。
+     * @param $string
+     * @param $filename
+     * @param $mode
+     */
+    protected static function writeFile($string, $filename, $mode = "w")
     {
-        $pattern = '/([\w]+)|(\\\u([\w]{4}))/i';
-        preg_match_all($pattern, $name, $matches);
-        if (!empty($matches)) {
-            $name = '';
-            for ($j = 0; $j < count($matches[0]); $j++) {
-                $str = $matches[0][$j];
-                if (strpos($str, '\\u') === 0) {
-                    $code = base_convert(substr($str, 2, 2), 16, 10);
-                    $code2 = base_convert(substr($str, 4), 16, 10);
-                    $c = chr($code) . chr($code2);
-                    $c = iconv('UCS-2', 'UTF-8', $c);
-                    $name .= $c;
-                } else {
-                    $name .= $str;
-                }
-            }
-        }
-        return $name;
+        $file = fopen($filename, $mode);
+        fwrite($file, $string);
+        fclose($file);
     }
 
     /**
-     * 
+     * 解码 GBK。将 GBK 码转换为对应的文字。
+     * @param $str
+     * @param string $prefix
+     * @param string $postfix
+     * @param bool $ignore_non_gbk
+     * @return string
+     */
+    private function gbk_decode($str, $prefix = '\&#x', $postfix = ';', $ignore_non_gbk = false)
+    {
+        /**
+         * GBK 模式。
+         * 例如 &#xffe5; 代表 ￥
+         * 目前只能识别十六进制编码。
+         * TODO: 识别十进制编码。
+         */
+        $gbk_pattern = "/" . $prefix . "[0-9a-zA-Z]{4}$postfix/";
+
+        /**
+         * 待搜索字符串偏移量。
+         */
+        $offset = 0;
+
+        /**
+         * 解码结果。
+         */
+        $result = "";
+        while ($offset < strlen($str)) {
+            $matches = null;
+            $seperate = "";
+
+            /**
+             * 只匹配第一个匹配的字符串，同时得出偏移量。
+             * 由于 $matches 中给出的偏移量并非以字节为准，故不采用其作为偏移量依据。而是每匹配一次，就排除已匹配结果。
+             */
+            preg_match($gbk_pattern, substr($str, $offset),$matches, PREG_OFFSET_CAPTURE);
+            if (empty($matches) || empty($matches)) {
+                continue;
+            }
+            if ($matches[0][1] > 0) { // 若条件成立，则代表第一个匹配值前有非gbk编码字符。
+                $seperate .= substr($str, $offset, $matches[0][1]);
+                $offset += strlen($seperate);
+                if (!$ignore_non_gbk) { // 若不忽略非 GBK 字符，则附加在结果中。
+                    $result .= $seperate;
+                }
+                continue;
+            }
+
+            /**
+             * 附加单次匹配结果。
+             */
+            $seperate .= $matches[0][0];
+
+            /**
+             * 修改偏移量。
+             * 注意，此处不使用 $matches 中提供的偏移量，因为那个值并非按字节衡量。
+             */
+            $offset += strlen($seperate);
+            $result .= mb_chr((int)base_convert(substr($matches[0][0], 3, 4), 16, 10));
+        }
+        return $result;
+    }
+    /**
+     * 查找标识符。
      * @param string $identity
      * @return Marc
      */
