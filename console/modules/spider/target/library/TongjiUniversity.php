@@ -32,6 +32,7 @@ class TongjiUniversity extends LibraryTarget
     public $identityTotal = 1;
     public $marcSelector = '#item_detail .booklist';
     public $bookSelector = 'div#tabs2 table#item tbody .whitetext';
+    public $statusSelector = 'div#mainbox div#container div#content_item div.book_article p#marc';
     public $marcNo;
 
     /**
@@ -60,6 +61,15 @@ class TongjiUniversity extends LibraryTarget
             return $this->getAbsoluteUrl($params);
         }
         return false;
+    }
+
+    public function extractStatus($dom)
+    {
+        $domStatus = $dom->find($this->statusSelector);
+        if (empty($domStatus)) {
+            return [];
+        }
+        return $domStatus[0];
     }
 
     /**
@@ -381,6 +391,23 @@ class TongjiUniversity extends LibraryTarget
                 if (!$marcModel->save()) {
                     print_r($marcModel->getErrors());
                     throw new \yii\db\IntegrityException("Something error(s) occured.\r\n");
+                }
+                $trans->commit();
+            } catch (\Exception $ex) {
+                $trans->rollBack();
+                echo $ex->getMessage();
+                $counter++;
+                continue;
+            }
+
+            $status = new TongjiUniversity\models\Status();
+            $status->marc_no = $marcModel->marc_no;
+            $status->marcStatus = $this->extractStatus($dom)->innertext();
+            $trans = $marcModel->getDb()->beginTransaction();
+            try {
+                if (!$status->save()) {
+                    print_r($status->getErrors());
+                    throw new \yii\db\IntegrityException("Something error(s) with status occured.\r\n");
                 }
                 $trans->commit();
             } catch (\Exception $ex) {

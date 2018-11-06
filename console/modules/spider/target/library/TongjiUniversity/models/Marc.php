@@ -1,5 +1,15 @@
 <?php
 
+/**
+ *  _   __ __ _____ _____ ___  ____  _____
+ * | | / // // ___//_  _//   ||  __||_   _|
+ * | |/ // /(__  )  / / / /| || |     | |
+ * |___//_//____/  /_/ /_/ |_||_|     |_|
+ * @link https://vistart.name/
+ * @copyright Copyright (c) 2016-2018 vistart
+ * @license https://vistart.name/license/
+ */
+
 namespace console\modules\spider\target\library\TongjiUniversity\models;
 
 use rhosocial\base\Models\models\BaseEntityModel;
@@ -290,6 +300,14 @@ class Marc extends BaseEntityModel
      */
     public function getItems()
     {
-        return $this->hasMany(Item::className(), ['marc_no' => 'marc_no']);
+        return $this->hasMany(Item::class, ['marc_no' => 'marc_no']);
+    }
+
+    /**
+     * @return StatusQuery
+     */
+    public function getStatus()
+    {
+        return $this->hasOne(Status::class, ['marc_no' => 'marc_no']);
     }
 }

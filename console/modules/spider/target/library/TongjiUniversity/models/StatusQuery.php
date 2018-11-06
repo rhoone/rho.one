@@ -13,11 +13,10 @@
 namespace console\modules\spider\target\library\TongjiUniversity\models;
 
 /**
- * This is the ActiveQuery class for [[Item]].
+ * This is the ActiveQuery class for [[Status]].
  *
- * @see Item
+ * @see Status
  */
-class ItemQuery extends \rhosocial\base\Models\queries\BaseEntityQuery
+class StatusQuery extends \rhosocial\base\Models\queries\BaseEntityQuery
 {
-    
 }
