@@ -14,6 +14,7 @@ namespace console\modules\spider\target\library;
 
 use console\modules\spider\target\library\TongjiUniversity\models\Item;
 use console\modules\spider\target\library\TongjiUniversity\models\Marc;
+use console\modules\spider\target\library\TongjiUniversity\models\Status;
 use Sunra\PhpSimple\HtmlDomParser;
 
 /**
@@ -303,9 +304,11 @@ class TongjiUniversity extends LibraryTarget
     /**
      * 组合馆藏数目信息。
      * @param $books
+     * @param $skipError
      * @return array
+     * @throws
      */
-    public function populateBooks($books)
+    public function populateBooks($books, $skipError = true)
     {
         $items = [];
         foreach ($books as $book) {
@@ -319,7 +322,13 @@ class TongjiUniversity extends LibraryTarget
             $position = trim(str_replace('&nbsp;', ' ', htmlspecialchars_decode($item[3]->text())));
             $status = trim(str_replace('&nbsp;', ' ', htmlspecialchars_decode($item[4]->text())));
 
-            $item = Item::find()->where(['marc_no' => $this->getMarcNo(), 'barcode' => $barcode])->one();
+            try {
+                $item = Item::find()->where(['marc_no' => $this->getMarcNo(), 'barcode' => $barcode])->one();
+            } catch (\Exception $ex) {
+                file_put_contents("php://stderr", $ex->getMessage());
+                if ($skipError) continue;
+                else throw $ex;
+            }
             if (!$item) {
                 $item = new Item(['marc_no' => $this->getMarcNo(), 'barcode' => $barcode]);
             }
@@ -330,6 +339,21 @@ class TongjiUniversity extends LibraryTarget
             $items[] = $item;
         }
         return $items;
+    }
+
+    /**
+     * @param $innertext
+     * @return Status|\rhosocial\base\models\queries\BaseEntityQuery
+     */
+    public function populateStatus($innertext)
+    {
+        $status = Status::find()->where(['marc_no' => $this->getMarcNo()])->one();
+        if (!$status) {
+            $status = new Status();
+        }
+        $status->marcStatus = $innertext;
+        $status->marc_no = $this->getMarcNo();
+        return $status;
     }
 
     /**
@@ -372,7 +396,7 @@ class TongjiUniversity extends LibraryTarget
             echo $this->getMarcNo($params[$this->identityParam]) . ":\r\n";
             $url = $this->getNextAbsoluteUrl($params);
             $dom = static::getHtml($url);
-            self::writeFile($dom,  "spider/Library/TongjiUniversity/" . $this->getMarcNo() . ".html");
+            #self::writeFile($dom,  "spider/Library/TongjiUniversity/" . $this->getMarcNo() . ".html");
             if (empty($dom)) {
                 $emptyCounter++;
                 $counter++;
@@ -400,9 +424,7 @@ class TongjiUniversity extends LibraryTarget
                 continue;
             }
 
-            $status = new TongjiUniversity\models\Status();
-            $status->marc_no = $marcModel->marc_no;
-            $status->marcStatus = $this->extractStatus($dom)->innertext();
+            $status = $this->populateStatus($this->extractStatus($dom)->innertext());
             $trans = $marcModel->getDb()->beginTransaction();
             try {
                 if (!$status->save()) {
