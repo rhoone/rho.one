@@ -303,9 +303,11 @@ class TongjiUniversity extends LibraryTarget
     /**
      * 组合馆藏数目信息。
      * @param $books
+     * @param $skipError
      * @return array
+     * @throws
      */
-    public function populateBooks($books)
+    public function populateBooks($books, $skipError = true)
     {
         $items = [];
         foreach ($books as $book) {
@@ -319,7 +321,13 @@ class TongjiUniversity extends LibraryTarget
             $position = trim(str_replace('&nbsp;', ' ', htmlspecialchars_decode($item[3]->text())));
             $status = trim(str_replace('&nbsp;', ' ', htmlspecialchars_decode($item[4]->text())));
 
-            $item = Item::find()->where(['marc_no' => $this->getMarcNo(), 'barcode' => $barcode])->one();
+            try {
+                $item = Item::find()->where(['marc_no' => $this->getMarcNo(), 'barcode' => $barcode])->one();
+            } catch (\Exception $ex) {
+                file_put_contents("php://stderr", $ex->getMessage());
+                if ($skipError) continue;
+                else throw $ex;
+            }
             if (!$item) {
                 $item = new Item(['marc_no' => $this->getMarcNo(), 'barcode' => $barcode]);
             }
