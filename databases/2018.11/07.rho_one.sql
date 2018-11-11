@@ -37,7 +37,7 @@ DROP TABLE IF EXISTS `crawl_library_tongjiuniversity_item`;
 CREATE TABLE IF NOT EXISTS `crawl_library_tongjiuniversity_item` (
   `guid` varbinary(16) NOT NULL COMMENT 'GUID',
   `marc_no` varchar(20) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `call_no` varchar(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `call_no` varchar(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `barcode` varchar(20) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `volume_period` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
   `position` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
