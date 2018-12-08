@@ -80,4 +80,14 @@ abstract class Target
      * @return mixed
      */
     abstract public function crawl();
+
+    public function download()
+    {
+
+    }
+
+    public function analyze()
+    {
+
+    }
 }

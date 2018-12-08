@@ -66,7 +66,7 @@ class LibraryController extends \yii\console\Controller
         }
         $duration = time() - $timestamp;
         $datetime = date('Y-m-d, H:i:s');
-        echo "$result primary record(s) done (at $datetime, GMT). Elapsed: $duration (seconds).\r\n";
+        $this->printResult($result, $datetime, $duration);
     }
 
     public function actionFind($target, $identity)
@@ -78,5 +78,26 @@ class LibraryController extends \yii\console\Controller
             echo "No model found.";
             return 0;
         }
+    }
+
+    public function actionDownload($target, $start = null, $count = null)
+    {
+        $library = static::getTarget($target);
+        /* @var $library LibraryTarget */
+        $params = null;
+        if ($start !== null || $count !== null) {
+            $params = ['start' => $start, 'count' => $count];
+        }
+        $timestamp = time();
+        $result = $library->download($params);
+        $duration = time() - $timestamp;
+        $datetime = date('Y-m-d, H:i:s');
+        $this->printResult($result, $datetime, $duration);
+    }
+
+    private function printResult($result, $datetime, $duration)
+    {
+        echo "$result primary record(s) done (at $datetime, GMT). Elapsed: $duration (seconds).\r\n";
+        return 0;
     }
 }

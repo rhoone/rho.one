@@ -14,6 +14,7 @@ namespace console\modules\spider\target\library;
 
 use console\modules\spider\target\library\TongjiUniversity\models\Item;
 use console\modules\spider\target\library\TongjiUniversity\models\Marc;
+use console\modules\spider\target\library\TongjiUniversity\models\Status;
 use Sunra\PhpSimple\HtmlDomParser;
 
 /**
@@ -23,8 +24,6 @@ use Sunra\PhpSimple\HtmlDomParser;
  */
 class TongjiUniversity extends LibraryTarget
 {
-
-    public $host = 'webpac.lib.tongji.edu.cn';
     public $relativeUrl = '/opac/item.php';
     public $identityParam = 'marc_no';
     public $identityFormat = '%010s';
@@ -34,6 +33,7 @@ class TongjiUniversity extends LibraryTarget
     public $bookSelector = 'div#tabs2 table#item tbody .whitetext';
     public $statusSelector = 'div#mainbox div#container div#content_item div.book_article p#marc';
     public $marcNo;
+
 
     /**
      * 获取机读目录编号。
@@ -61,6 +61,67 @@ class TongjiUniversity extends LibraryTarget
             return $this->getAbsoluteUrl($params);
         }
         return false;
+    }
+
+    public $host = 'webpac.lib.tongji.edu.cn';
+    public $marcUrl = '/opac/item.php';
+    public $marcParam = 'marc_no';
+
+    public $relatedUrl = '/opac/ajax_lend_related.php';
+
+    public $dataVisualBookUrl = '/data/data_visual_book.php';
+    public $dataVisualBookParam = 'id';
+    public $contentBaseDirectory = 'spider/Library/TongjiUniversity';
+
+    /**
+     * 根据配置下载
+     * @param $config
+     * @return bool
+     *//*
+    public function download($config)
+    {
+        $this->changeConfig($config);
+        $counter = 0;
+        $emptyCounter = 0;
+        $success = 0;
+        $params = [$this->identityParam => $this->identityStart - 1];
+        while ($counter < $this->identityTotal) {
+            echo $this->getMarcNo($params[$this->identityParam]) . ":\r\n";
+            $this->relativeUrl = $this->marcUrl;
+            $url = $this->getNextAbsoluteUrl($params);
+            if (!$this->downloadMarc($url)) {
+                $emptyCounter++;
+                continue;
+            }
+
+            $this->relativeUrl = $this->dataVisualBookUrl;
+            $params = [$this->dataVisualBookParam => $this->identityStart - 1];
+            if ($this->downloadVisualBook($url)) {
+                $success++;
+            }
+            $counter++;
+        }
+        return true;
+    }*/
+
+    protected function downloadMarc($url)
+    {
+        $dom = static::getHtml($url);
+        if ($this->isEmptyMarc($dom)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function downloadRelated()
+    {
+
+    }
+
+    protected function downloadVisualBook($url)
+    {
+
     }
 
     public function extractStatus($dom)
@@ -213,11 +274,15 @@ class TongjiUniversity extends LibraryTarget
     /**
      * 组合机读信息。
      * @param $item
+     * @param $skipFindExist 跳过查找数据库中已有记录。
      * @return array|Marc|null|\yii\db\ActiveRecord
      */
-    public function populateMarc($item)
+    public function populateMarc($item, $skipFindExist = false)
     {
-        $model = Marc::find()->where(['marc_no' => $this->getMarcNo()])->one();
+        $model = null;
+        if (!$skipFindExist) {
+            $model = Marc::find()->where(['marc_no' => $this->getMarcNo()])->one();
+        }
         if (!$model) {
             $model = new Marc(['marc_no' => $this->getMarcNo()]);
         }
@@ -341,6 +406,21 @@ class TongjiUniversity extends LibraryTarget
     }
 
     /**
+     * @param $innertext
+     * @return Status|\rhosocial\base\models\queries\BaseEntityQuery
+     */
+    public function populateStatus($innertext)
+    {
+        $status = Status::find()->where(['marc_no' => $this->getMarcNo()])->one();
+        if (!$status) {
+            $status = new Status();
+        }
+        $status->marcStatus = $innertext;
+        $status->marc_no = $this->getMarcNo();
+        return $status;
+    }
+
+    /**
      * 修改配置。
      * @param $config
      */
@@ -364,6 +444,18 @@ class TongjiUniversity extends LibraryTarget
     }
 
     /**
+     * 判断当前 MARC 内容是否为空。
+     * @param $dom
+     * @return bool
+     */
+    protected function isEmptyMarc($dom)
+    {
+        $marc = $this->extractMarc($dom);
+        $marcModel = $this->populateMarc($marc, true);
+        return empty($marcModel->title);
+    }
+
+    /**
      * 抓取
      * @param null $config
      * @return int|mixed
@@ -380,7 +472,7 @@ class TongjiUniversity extends LibraryTarget
             echo $this->getMarcNo($params[$this->identityParam]) . ":\r\n";
             $url = $this->getNextAbsoluteUrl($params);
             $dom = static::getHtml($url);
-            self::writeFile($dom,  "spider/Library/TongjiUniversity/" . $this->getMarcNo() . ".html");
+            #self::writeFile($dom,  "spider/Library/TongjiUniversity/" . $this->getMarcNo() . ".html");
             if (empty($dom)) {
                 $emptyCounter++;
                 $counter++;
@@ -408,9 +500,7 @@ class TongjiUniversity extends LibraryTarget
                 continue;
             }
 
-            $status = new TongjiUniversity\models\Status();
-            $status->marc_no = $marcModel->marc_no;
-            $status->marcStatus = $this->extractStatus($dom)->innertext();
+            $status = $this->populateStatus($this->extractStatus($dom)->innertext());
             $trans = $marcModel->getDb()->beginTransaction();
             try {
                 if (!$status->save()) {
@@ -475,17 +565,17 @@ class TongjiUniversity extends LibraryTarget
         try {
             $dom = HtmlDomParser::file_get_html($url, false, null, 0);
             if ($counter > 0) {
-                echo "Retried successfully!\r\n";
+                #echo "Retried successfully!\r\n";
             }
         } catch (\Exception $ex) {
-            echo "Error occured at " . date('Y-m-d H:i:s') . "\r\n";
-            echo $ex->getMessage() . "\r\n";
+            file_put_contents("php://stderr", "Error occured at " . date('Y-m-d H:i:s') . "\r\n");
+            file_put_contents("php://stderr", $ex->getMessage() . "\r\n");
             $sleep *= $counter;
-            echo "Sleep $sleep second:\r\n";
+            file_put_contents("php://stderr", "Sleep $sleep second:\r\n");
             sleep($sleep);
             if ($counter < 5) {
                 $counter++;
-                echo "Retry $counter:\r\n";
+                file_put_contents("php://stderr",  "Retry $counter:\r\n");
                 goto retry;
             } else {
                 $dom = null;
