@@ -8,6 +8,7 @@
     "minimum-stability": "stable",
     "require": {
         "php": ">=7.2.7",
+        "ext-json": "*",
         "yiisoft/yii2": ">=2.0.15",
         "yiisoft/yii2-bootstrap": "^2.0.8",
         "yiisoft/yii2-composer": "^2.0.7",
@@ -26,14 +27,15 @@
         "bower-asset/open-sans": "^1.1",
         "bower-asset/holderjs": "^2.9.4",
         "bower-asset/nprogress": "^0.2.0",
-        "bower-asset/popper.js": "^v1.12.9",
+        "bower-asset/popper.js": "^v1.14.6",
         "rhoone/yii2-rhoone": "dev-master",
         "rhoone/rhoone-task": "dev-master",
-        "rhoone/rhoone-feedback": "dev-master"
+        "rhoone/rhoone-feedback": "dev-master",
+        "yiisoft/yii2-elasticsearch": "2.1.x-dev"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "^2.0.13",
-        "yiisoft/yii2-gii": "^2.0.7",
+        "yiisoft/yii2-gii": "^2.0.8",
         "yiisoft/yii2-faker": "^2.0.4",
         "codeception/base": "^2.4.5",
         "codeception/verify": "~0.3.3"

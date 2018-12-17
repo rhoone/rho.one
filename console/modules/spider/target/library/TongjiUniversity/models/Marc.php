@@ -108,6 +108,12 @@ class Marc extends BaseEntityModel
         ];
     }
 
+    public $separating_type = 1;
+
+    public static $separating_types = [1 => "delimiter", 2 => 'json'];
+
+    public $array_delimiter = "%^@@^%";
+
     public function getTitle()
     {
         return ($this->title);
@@ -120,12 +126,16 @@ class Marc extends BaseEntityModel
 
     public function getISBN()
     {
-        return json_decode($this->ISBN);
+        if ($this->separating_type == 1)
+            return explode($this->array_delimiter, $this->ISBN); //json_decode($this->ISBN);
+        if ($this->separating_type == 2)
+            return json_decode($this->ISBN);
+        return $this->ISBN;
     }
 
     public function setISBN($ISBN)
     {
-        return $this->ISBN = json_encode($ISBN);
+        return $this->ISBN = implode($this->array_delimiter, $ISBN); //json_encode($ISBN);
     }
 
     public function appendISBN($ISBN)
@@ -135,12 +145,12 @@ class Marc extends BaseEntityModel
 
     public function getPrice()
     {
-        return json_decode($this->price);
+        return explode($this->array_delimiter, $this->price); //json_decode($this->price);
     }
 
     public function setPrice($price)
     {
-        return $this->price = json_encode($price);
+        return $this->price = implode($this->array_delimiter, $price); //json_encode($price);
     }
 
     public function appendPrice($price)
@@ -150,12 +160,12 @@ class Marc extends BaseEntityModel
 
     public function getPress()
     {
-        return json_decode($this->press);
+        return explode($this->array_delimiter, $this->press); // json_decode($this->press);
     }
 
     public function setPress($press)
     {
-        return $this->press = json_encode($press);
+        return $this->press = implode($this->array_delimiter, $press); // json_encode($press);
     }
 
     public function appendPress($press)
@@ -165,12 +175,12 @@ class Marc extends BaseEntityModel
 
     public function getForm()
     {
-        return json_decode($this->form);
+        return explode($this->array_delimiter, $this->form); // json_decode($this->form);
     }
 
     public function setForm($form)
     {
-        return $this->form = json_encode($form);
+        return $this->form = implode($this->array_delimiter, $form); // json_encode($form);
     }
 
     public function appendForm($form)
@@ -180,12 +190,12 @@ class Marc extends BaseEntityModel
 
     public function getUniformTitle()
     {
-        return json_decode($this->uniform_title);
+        return explode($this->array_delimiter, $this->uniform_title); // json_decode($this->uniform_title);
     }
 
     public function setUniformTitle($uniform_title)
     {
-        return $this->uniform_title = json_encode($uniform_title);
+        return $this->uniform_title = implode($this->array_delimiter, $uniform_title); // json_encode($uniform_title);
     }
 
     public function appendUniformTitle($uniform_title)
@@ -195,12 +205,12 @@ class Marc extends BaseEntityModel
 
     public function getAdditionalTitle()
     {
-        return json_decode($this->additional_title);
+        return explode($this->array_delimiter, $this->additional_title); // json_decode($this->additional_title);
     }
 
     public function setAdditionalTitle($additional_title)
     {
-        return $this->additional_title = json_encode($additional_title);
+        return $this->additional_title = implode($this->array_delimiter, $additional_title); // json_encode($additional_title);
     }
 
     public function appendAdditionalTitle($additional_title)
@@ -210,12 +220,12 @@ class Marc extends BaseEntityModel
 
     public function getAuthor()
     {
-        return json_decode($this->author);
+        return explode($this->array_delimiter, $this->author); // json_decode($this->author);
     }
 
     public function setAuthor($author)
     {
-        return $this->author = json_encode($author);
+        return $this->author = implode($this->array_delimiter, $author); // json_encode($author);
     }
 
     public function appendAuthor($author)
@@ -225,12 +235,12 @@ class Marc extends BaseEntityModel
 
     public function getGroupAuthor()
     {
-        return json_decode($this->group_author);
+        return explode($this->array_delimiter, $this->group_author); // json_decode($this->group_author);
     }
 
     public function setGroupAuthor($group_author)
     {
-        return $this->group_author = json_encode($group_author);
+        return $this->group_author = implode($this->array_delimiter, $group_author); // json_encode($group_author);
     }
 
     public function appendGroupAuthor($group_author)
@@ -240,12 +250,12 @@ class Marc extends BaseEntityModel
     
     public function getAuthorRemark()
     {
-        return json_decode($this->author_remark);
+        return explode($this->array_delimiter, $this->author_remark); // json_decode($this->author_remark);
     }
     
     public function setAuthorRemark($remark)
     {
-        return $this->author_remark = json_encode($remark);
+        return $this->author_remark = implode($this->array_delimiter, $remark); // json_encode($remark);
     }
     
     public function appendAuthorRemark($remark)
@@ -255,12 +265,12 @@ class Marc extends BaseEntityModel
 
     public function getSubject()
     {
-        return json_decode($this->subject);
+        return explode($this->array_delimiter, $this->subject); // json_decode($this->subject);
     }
 
     public function setSubject($subject)
     {
-        return $this->subject = json_encode($subject);
+        return $this->subject = implode($this->array_delimiter, $subject); // json_encode($subject);
     }
 
     public function appendSubject($subject)
@@ -270,12 +280,12 @@ class Marc extends BaseEntityModel
 
     public function getClass()
     {
-        return json_decode($this->class);
+        return explode($this->array_delimiter, $this->class); // json_decode($this->class);
     }
 
     public function setClass($class)
     {
-        return $this->class = json_encode($class);
+        return $this->class = implode($this->array_delimiter, $class); // json_encode($class);
     }
 
     public function appendClass($class)
@@ -285,14 +295,14 @@ class Marc extends BaseEntityModel
 
     public function appendAttribute($name, $value, $skipExist = true)
     {
-        $values = json_decode($this->getAttribute($name));
+        $values = explode($this->array_delimiter, $this->getAttribute($name));
         if (empty($values)) {
             $values = [];
         }
         if (!($skipExist && in_array($value, $values))) {
             $values[] = $value;
         }
-        return $this->setAttribute($name, json_encode($values));
+        return $this->setAttribute($name, implode($this->array_delimiter, $values));
     }
 
     /**
