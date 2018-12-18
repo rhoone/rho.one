@@ -12,8 +12,10 @@
 
 namespace console\modules\spider\target\library;
 
+use console\modules\spider\target\library\TongjiUniversity\models\BookDescriptor;
 use console\modules\spider\target\library\TongjiUniversity\models\Item;
 use console\modules\spider\target\library\TongjiUniversity\models\Marc;
+use console\modules\spider\target\library\TongjiUniversity\models\search\Book;
 use console\modules\spider\target\library\TongjiUniversity\models\Status;
 use Sunra\PhpSimple\HtmlDomParser;
 
@@ -683,4 +685,24 @@ class TongjiUniversity extends LibraryTarget
         }
         return true;
     }
+
+    public static function getBookDescriptor($marc_no)
+    {
+        $bookDescriptor = new BookDescriptor();
+        $bookDescriptor->marc = $marc_no;
+        return $bookDescriptor;
+    }
+
+    public static function getBookDescriptors($start = 0, $limit = 1)
+    {
+        $bookDescs = [];
+        foreach (Marc::find()->page($limit, $start)->orderBy(['marc_no' => SORT_ASC])->each() as $marc)
+        {
+            $bookDescs[] = static::getBookDescriptor($marc->marc_no);
+        }
+        return $bookDescs;
+    }
+
+    public $marcClass = Marc::class;
+    public $bookSearchClass = Book::class;
 }

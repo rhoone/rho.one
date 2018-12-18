@@ -72,4 +72,24 @@ abstract class LibraryTarget extends Target
     {
         
     }
+
+    public static function getBookDescriptor($marc_no)
+    {
+
+    }
+
+    public static function getBookDescriptors($start, $limit)
+    {
+
+    }
+
+    public static function getBook($marc_no, $barcode)
+    {
+
+    }
+
+    public static function getAllBooks($marc_no)
+    {
+
+    }
 }

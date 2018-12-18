@@ -42,6 +42,7 @@ use Yii;
  * @property string $update_time
  *
  * @property Item[] $items
+ * @property Status[] $status
  */
 class Marc extends BaseEntityModel
 {
@@ -135,7 +136,13 @@ class Marc extends BaseEntityModel
 
     public function setISBN($ISBN)
     {
-        return $this->ISBN = implode($this->array_delimiter, $ISBN); //json_encode($ISBN);
+        if ($this->separating_type == 1)
+        {
+            $this->ISBN = implode($this->separating_type, $ISBN);
+            return;
+        }
+        if ($this->separating_type == 2)
+            $this->ISBN = json_encode($ISBN);
     }
 
     public function appendISBN($ISBN)
@@ -302,7 +309,7 @@ class Marc extends BaseEntityModel
         if (!($skipExist && in_array($value, $values))) {
             $values[] = $value;
         }
-        return $this->setAttribute($name, implode($this->array_delimiter, $values));
+        return $this->setAttribute($name, implode($this->array_delimiter, array_filter($values)));
     }
 
     /**

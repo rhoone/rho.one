@@ -15,6 +15,12 @@ return [
         'assetManager' => [
             'linkAssets' => true,
         ],
+        'elasticsearch' => [
+            'class' => 'yii\elasticsearch\Connection',
+            'nodes' => [
+                ['http_address' => 'inet[/web_elasticsearch_1:9200]',],
+            ],
+        ],
     ],
     'modules' => [
         'rhoone' => [

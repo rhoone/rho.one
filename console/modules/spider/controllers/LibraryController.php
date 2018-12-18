@@ -13,6 +13,7 @@
 namespace console\modules\spider\controllers;
 
 use console\modules\spider\target\library\LibraryTarget;
+use console\modules\spider\target\library\TongjiUniversity\models\search\Book;
 
 /**
  * Library Spider
@@ -99,5 +100,51 @@ class LibraryController extends \yii\console\Controller
     {
         echo "$result primary record(s) done (at $datetime, GMT). Elapsed: $duration (seconds).\r\n";
         return 0;
+    }
+
+    public function actionTransfer($target, $start = 0, $count = 1)
+    {
+        $library = static::getTarget($target);
+        $class = get_class($library);
+        $start = (int)$start;
+        $count = (int)$count;
+
+        $timestamp = time();
+        $i = 0;
+        foreach ($library->marcClass::find()->page($count, $start / $count)->orderBy(['marc_no' => SORT_ASC])->each() as $marc)
+        {
+            $bookDesc = $class::getBookDescriptor($marc->marc_no);
+            $bookSearch = new Book();
+            $bookSearch->refreshAttributes($bookDesc);
+            $result = $bookSearch->save();
+            if (!$result)
+            {
+                file_put_contents("php://stderr", print_r($bookSearch->getErrors()));
+            }
+            printf("progress: [%-50s] %d%% Done.\r", str_repeat('#', $i / $count * 50), $i / $count * 100);
+            $i++;
+        }
+        $duration = time() - $timestamp;
+        $datetime = date('Y-m-d, H:i:s');
+        $this->printResult($i, $datetime, $duration);
+        return 0;
+    }
+
+    public function actionResetSearchMapping($target)
+    {
+        $library = self::getTarget($target);
+        $library->bookSearchClass::updateMapping();
+    }
+
+    public function actionClearSearchIndex($target)
+    {
+        $library = self::getTarget($target);
+        $bookSearch = $library->bookSearchClass::deleteAll();
+    }
+
+    public function actionCreateSearchIndex($target)
+    {
+        $library = self::getTarget($target);
+        $library->bookSearchClass::createIndex();
     }
 }
