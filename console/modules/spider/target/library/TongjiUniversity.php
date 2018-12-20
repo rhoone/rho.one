@@ -18,6 +18,7 @@ use console\modules\spider\target\library\TongjiUniversity\models\Marc;
 use console\modules\spider\target\library\TongjiUniversity\models\search\Book;
 use console\modules\spider\target\library\TongjiUniversity\models\Status;
 use Sunra\PhpSimple\HtmlDomParser;
+use yii\data\ActiveDataProvider;
 
 /**
  * 同济大学图书馆页面描述和抓取。
@@ -705,4 +706,46 @@ class TongjiUniversity extends LibraryTarget
 
     public $marcClass = Marc::class;
     public $bookSearchClass = Book::class;
+
+    protected function buildQueryArray($keywords)
+    {
+        return ([
+            'multi_match' => [
+                'query' => implode(' ', (array)$keywords),
+                'type' => 'most_fields',
+                'fields' => [
+                    'title^5',
+                    'authors.1^5',
+                    'presses.1^3',
+                    'marc_no.1^2',
+                    'subjects.1^2',
+                    'books.position^1.2',
+                    'books.status^1.2',
+                    'books.barcode^1.2',
+                    'books.volume_period^1.2',
+                    'classes.1^1.1',
+                    'call_no.1^1.1',
+                    'ISBNs.1',
+                    'abstract',
+                    'target_readers',
+                    'status',
+                ],
+                'tie_breaker' => 0.3,
+                'minimum_should_match' => '30%',
+            ]
+        ]);
+    }
+
+    public function search($keywords)
+    {
+        $queryArray = $this->buildQueryArray($keywords);
+        $query = Book::find()->query($queryArray);
+        $provider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+        ]);
+        return $provider->getModels();
+    }
 }

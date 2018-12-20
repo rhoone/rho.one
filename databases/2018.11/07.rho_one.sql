@@ -146,7 +146,7 @@ CREATE TABLE IF NOT EXISTS `crawl_library_tongjiuniversity_status` (
 
 DROP TABLE IF EXISTS `extension`;
 CREATE TABLE IF NOT EXISTS `extension` (
-  `guid` varchar(36) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL COMMENT 'Extension GUID',
+  `guid` varbinary(16) NOT NULL COMMENT 'Extension GUID',
   `id` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT 'Extension ID',
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT 'Extension Name',
   `classname` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT 'classname',
@@ -154,8 +154,8 @@ CREATE TABLE IF NOT EXISTS `extension` (
   `enabled` bit(1) NOT NULL DEFAULT b'0' COMMENT 'Enabled',
   `monopolized` bit(1) NOT NULL DEFAULT b'0' COMMENT 'Monopolized',
   `default` bit(1) NOT NULL DEFAULT b'0' COMMENT 'Default',
-  `create_time` datetime NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT 'Create Time',
-  `update_time` datetime NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT 'Update Time',
+  `created_at` datetime NOT NULL COMMENT 'Created At',
+  `updated_at` datetime NOT NULL COMMENT 'Updated At',
   `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT 'Description',
   PRIMARY KEY (`guid`),
   UNIQUE KEY `extension_classname_unique` (`classname`) USING BTREE,
@@ -176,11 +176,11 @@ CREATE TABLE IF NOT EXISTS `extension` (
 
 DROP TABLE IF EXISTS `headword`;
 CREATE TABLE IF NOT EXISTS `headword` (
-  `guid` varchar(36) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL COMMENT 'Headword GUID',
+  `guid` varbinary(16) NOT NULL COMMENT 'Headword GUID',
   `word` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Headword',
-  `extension_guid` varchar(36) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL COMMENT 'Extension GUID',
-  `create_time` datetime NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT 'Create Time',
-  `update_time` datetime NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT 'Update Time',
+  `extension_guid` varbinary(16) NOT NULL COMMENT 'Extension GUID',
+  `created_at` datetime NOT NULL COMMENT 'Created At',
+  `updated_at` datetime NOT NULL COMMENT 'Updated At',
   PRIMARY KEY (`guid`),
   UNIQUE KEY `headword_extension_unique` (`word`,`extension_guid`),
   KEY `headword_extension_fkey` (`extension_guid`)
@@ -202,12 +202,12 @@ CREATE TABLE IF NOT EXISTS `headword` (
 
 DROP TABLE IF EXISTS `server`;
 CREATE TABLE IF NOT EXISTS `server` (
-  `guid` varchar(36) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL COMMENT 'Server GUID',
+  `guid` varbinary(16) NOT NULL COMMENT 'Server GUID',
   `id` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL COMMENT 'Server ID',
   `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL COMMENT 'Server Name',
   `endpoint` varchar(1024) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL COMMENT 'Endpoint',
-  `create_time` datetime NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT 'Create Time',
-  `update_time` datetime NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT 'Create Time',
+  `created_at` datetime NOT NULL COMMENT 'Created At',
+  `updated_at` datetime NOT NULL COMMENT 'Updated At',
   PRIMARY KEY (`guid`),
   UNIQUE KEY `server_id_unique` (`id`),
   UNIQUE KEY `server_endpoint_unique` (`endpoint`)
@@ -227,11 +227,11 @@ CREATE TABLE IF NOT EXISTS `server` (
 
 DROP TABLE IF EXISTS `synonym`;
 CREATE TABLE IF NOT EXISTS `synonym` (
-  `guid` varchar(36) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL COMMENT 'Synonym GUID',
+  `guid` varbinary(16) NOT NULL COMMENT 'Synonym GUID',
   `word` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Synonym',
-  `headword_guid` varchar(36) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL COMMENT 'Headword GUID',
-  `create_time` datetime NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT 'Create Time',
-  `update_time` datetime NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT 'Update Time',
+  `headword_guid` varbinary(16) NOT NULL COMMENT 'Headword GUID',
+  `created_at` datetime NOT NULL COMMENT 'Created At',
+  `updated_at` datetime NOT NULL COMMENT 'Updated At',
   PRIMARY KEY (`guid`),
   UNIQUE KEY `synonym_headword_unique` (`word`,`headword_guid`) USING BTREE,
   KEY `synonym_headword_fkey` (`headword_guid`)
@@ -253,7 +253,7 @@ CREATE TABLE IF NOT EXISTS `synonym` (
 
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE IF NOT EXISTS `user` (
-  `guid` varchar(36) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `guid` varbinary(16) NOT NULL COMMENT 'User GUID',
   `id` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `pass_hash` varchar(80) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `ip_1` int(11) UNSIGNED NOT NULL DEFAULT '0',
@@ -261,8 +261,8 @@ CREATE TABLE IF NOT EXISTS `user` (
   `ip_3` int(11) UNSIGNED NOT NULL DEFAULT '0',
   `ip_4` int(11) UNSIGNED NOT NULL DEFAULT '0',
   `ip_type` tinyint(3) UNSIGNED NOT NULL DEFAULT '4',
-  `create_time` datetime NOT NULL DEFAULT '1970-01-01 00:00:00',
-  `update_time` datetime NOT NULL DEFAULT '1970-01-01 00:00:00',
+  `created_at` datetime NOT NULL COMMENT 'Created At',
+  `updated_at` datetime NOT NULL COMMENT 'Updated At',
   `auth_key` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `access_token` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `password_reset_token` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT '',

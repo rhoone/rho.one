@@ -102,7 +102,7 @@ class LibraryController extends \yii\console\Controller
         return 0;
     }
 
-    public function actionTransfer($target, $start = 0, $count = 1)
+    public function actionTransfer($target, $start = 0, $count = 1, $skip_error = true)
     {
         $library = static::getTarget($target);
         $class = get_class($library);
@@ -111,12 +111,21 @@ class LibraryController extends \yii\console\Controller
 
         $timestamp = time();
         $i = 0;
-        foreach ($library->marcClass::find()->page($count, $start / $count)->orderBy(['marc_no' => SORT_ASC])->each() as $marc)
+        foreach ($library->marcClass::find()->page($count, $start / $count)->orderBy(['marc_no' => SORT_ASC])->all() as $marc)
         {
             $bookDesc = $class::getBookDescriptor($marc->marc_no);
             $bookSearch = new Book();
             $bookSearch->refreshAttributes($bookDesc);
-            $result = $bookSearch->save();
+            $result = 0;
+            try {
+                $result = $bookSearch->save();
+            } catch (\Exception $ex) {
+                file_put_contents("php://stderr", "MarcNo: " . $marc->marc_no);
+                file_put_contents("php://stderr", print_r($bookSearch->getErrors()));
+                if (!$skip_error) {
+                    throw $ex;
+                }
+            }
             if (!$result)
             {
                 file_put_contents("php://stderr", print_r($bookSearch->getErrors()));
@@ -146,5 +155,11 @@ class LibraryController extends \yii\console\Controller
     {
         $library = self::getTarget($target);
         $library->bookSearchClass::createIndex();
+    }
+
+    public function actionSearch($target)
+    {
+        $library = self::getTarget($target);
+
     }
 }

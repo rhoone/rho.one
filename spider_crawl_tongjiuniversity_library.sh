@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for (( i=210; i < 250; i++))
+for (( i=337; i < 338; i++))
 do
 	let OFFSET=10000
 	let MARC_START=$OFFSET*i+1

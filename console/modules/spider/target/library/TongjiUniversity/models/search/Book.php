@@ -43,6 +43,7 @@ class Book extends \yii\elasticsearch\ActiveRecord
     public function attributes()
     {
         return [
+            '_id',
             'marc_no',
             'title',
             'authors',
@@ -96,6 +97,7 @@ class Book extends \yii\elasticsearch\ActiveRecord
                 'properties' => [
                     'marc_no' => [
                         'type' => 'text',
+                        'fielddata' => true,
                     ],
                     'title' => [
                         'type' => 'text',
@@ -124,6 +126,7 @@ class Book extends \yii\elasticsearch\ActiveRecord
                         'properties' => [
                             1 => [
                                 'type' => 'text',
+                                'fielddata' => true,
                             ],
                         ],
                     ],
@@ -147,6 +150,7 @@ class Book extends \yii\elasticsearch\ActiveRecord
                     ],
                     'call_no' => [
                         'type' => 'text',
+                        'fielddata' => true,
                     ],
                     'abstract' => [
                         'type' => 'text',
@@ -157,6 +161,7 @@ class Book extends \yii\elasticsearch\ActiveRecord
                         'properties' => [
                             'barcode' => [
                                 'type' => 'text',
+                                'fielddata' => true,
                             ],
                             'position' =>[
                                 'type' => 'text',
@@ -166,6 +171,7 @@ class Book extends \yii\elasticsearch\ActiveRecord
                             ],
                             'volume_period' => [
                                 'type' => 'text',
+                                'fielddata' => true,
                             ],
                         ],
                     ],

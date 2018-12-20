@@ -21,6 +21,10 @@ use rhoone\extension\Extension as ExternalExt;
  */
 class Extension extends ExternalExt
 {
+    public static function id()
+    {
+        return 'tongji-curriculum';
+    }
 
     public static function name()
     {
@@ -39,7 +43,7 @@ class Extension extends ExternalExt
     public static function getModule()
     {
         return [
-            'class' => Module::className(),
+            'class' => Module::class,
             'id' => 'tongji-curriculum',
         ];
     }
