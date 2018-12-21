@@ -34,7 +34,13 @@ $items = $provider->getModels();
     <p>没有找到您想要的内容。</p>
     <p>建议您更换关键词。</p>
     <?php else: ?>
-    <p>共 <?= $pagination->totalCount ?> 条结果，本页显示第 <?= $pagination->page * $pagination->pageSize + 1 . ' - ' . ($pagination->page + 1) * $pagination->pageSize ?> 条。</p>
+    <?php
+        $start = $pagination->page * $pagination->pageSize + 1;
+        $end = $start + $pagination->pageSize - 1;
+        if ($end > $pagination->totalCount) {
+            $end = $pagination->totalCount;
+        } ?>
+    <p>共 <?= $pagination->totalCount ?> 条结果，本页显示第 <?= $start . ' - ' . $end ?> 条。</p>
     <?php foreach ($items as $item): ?>
     <?= SearchResultItem::widget(['item' => $item]) ?>
     <?php endforeach; ?>
