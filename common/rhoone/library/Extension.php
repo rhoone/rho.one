@@ -20,7 +20,7 @@
 
 namespace common\rhoone\library;
 
-use console\modules\spider\target\library\TongjiUniversity\models\search\Book;
+use common\rhoone\library\widgets\SearchResultItems;
 use rhoone\extension\Extension as ExternalExt;
 
 class Extension extends ExternalExt
@@ -36,16 +36,17 @@ class Extension extends ExternalExt
         return '同济大学图书馆';
     }
 
-    public function search($keywords)
+    /**
+     * @param mixed $keywords
+     * @param mixed $config
+     * @return string
+     * @throws \Exception
+     */
+    public function search($keywords, $config = [])
     {
         $library = new $this->libraryClass;
-        $results = [];
-        foreach ($library->search($keywords) as $item)
-        {
-            /* @var Book $item */
-            $results[] = ($item->title . " | " . next($item->authors) . " | " . $item->call_no . " | " . $item->marc_no . "<br/>");
-        }
-        return implode(" ", $results);
+        $provider = $library->search($keywords, $config);
+        return SearchResultItems::widget(['provider' => $provider]);
     }
 
     /**

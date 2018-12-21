@@ -707,45 +707,124 @@ class TongjiUniversity extends LibraryTarget
     public $marcClass = Marc::class;
     public $bookSearchClass = Book::class;
 
-    protected function buildQueryArray($keywords)
+    /**
+     * 构建检索条件矩阵。
+     * @param string|array $keywords 关键词。若关键词是字符串，将转换为单元素数组。
+     * @param null|array $fields 域键值对。
+     * @return array 检索条件矩阵。
+     */
+    protected function buildQueryArray($keywords, $fields = null, $type = 'most_fields', $tie_breaker = 0.3, $minimum_should_match = '30%')
     {
+        /**
+         * 若 $fields 为空，将指定默认域和权重。
+         */
+        if (empty($fields)) {
+        	$fields = [
+                'title^5',
+                'authors.1^5',
+                'presses.1^3',
+                'marc_no^2',
+                'subjects.1^2',
+                //'books.position^1.2',
+                'books.status^1.2',
+                'books.barcode^3.8',
+                //'books.volume_period^1.2',
+                'classes.1^5',
+                'call_no^5',
+                'ISBNs.1',
+                'abstract',
+                //'target_readers',
+                'status',
+        	];
+        }
+
         return ([
             'multi_match' => [
                 'query' => implode(' ', (array)$keywords),
-                'type' => 'most_fields',
-                'fields' => [
-                    'title^5',
-                    'authors.1^5',
-                    'presses.1^3',
-                    'marc_no.1^2',
-                    'subjects.1^2',
-                    'books.position^1.2',
-                    'books.status^1.2',
-                    'books.barcode^1.2',
-                    'books.volume_period^1.2',
-                    'classes.1^1.1',
-                    'call_no.1^1.1',
-                    'ISBNs.1',
-                    'abstract',
-                    'target_readers',
-                    'status',
-                ],
-                'tie_breaker' => 0.3,
-                'minimum_should_match' => '30%',
+                'type' => $type,
+                'fields' => $fields,
+                'tie_breaker' => $tie_breaker,
+                'minimum_should_match' => $minimum_should_match,
             ]
         ]);
     }
 
-    public function search($keywords)
+    /**
+     * @param $keywords
+     * @param $fields
+     * @return array
+     */
+    protected function buildMatchPhraseQueryArray($keywords, $fields)
     {
-        $queryArray = $this->buildQueryArray($keywords);
-        $query = Book::find()->query($queryArray);
-        $provider = new ActiveDataProvider([
-            'query' => $query,
-            'pagination' => [
-                'pageSize' => 10,
+        return [
+            'match_phrase' => [
+                $fields => implode(' ', (array) $keywords)
+            ],
+        ];
+    }
+
+    protected function buildQueryPressesArray($keywords, $fields = 'presses.1')
+    {
+        return $this->buildMatchPhraseQueryArray($keywords, $fields);
+    }
+
+    protected function buildQueryAuthorsArray($keywords, $fields = 'authors.1')
+    {
+        return $this->buildMatchPhraseQueryArray($keywords, $fields);
+    }
+
+    protected function buildQueryClassesAndCallNoArray($keywords, $fields = [
+        'classes.1',
+        'call_no',
+    ])
+    {
+        return $this->buildQueryArray($keywords, $fields);
+    }
+
+    protected function buildQueryISBNsArray($keywords, $fields = 'ISBNs.1')
+    {
+        return $this->buildMatchPhraseQueryArray($keywords, $fields);
+    }
+    
+    protected function buildQueryTitleArray($keywords, $fields = 'title')
+    {
+        return $this->buildMatchPhraseQueryArray($keywords, $fields);
+    }
+    
+    protected function buildQueryOptions()
+    {
+        return ([
+            'highlight' => [
+                'fields' => [
+                    'title' => [], 'authors.1' => [], 'presses.1' => [], 'call_no' => [], 'abstract' => [],
+                ],
             ],
         ]);
-        return $provider->getModels();
+    }
+
+    protected function buildQuery($keywords, $config = [] , $explain = false, $option = [])
+    {
+        $pressesQuery = Book::find()->query($this->buildQueryPressesArray($keywords))->explain($explain)->options($option);
+        \Yii::info($pressesQuery->count(), __METHOD__ . '|presses.1:');
+        $authorsQuery = Book::find()->query($this->buildQueryAuthorsArray($keywords))->explain($explain)->options($option);
+        \Yii::info($authorsQuery->count(), __METHOD__ . '|authors.1:');
+        $ISBNsQuery = Book::find()->query($this->buildQueryISBNsArray($keywords))->explain($explain)->options($option);
+        \Yii::info($ISBNsQuery->count(), __METHOD__ . '|ISBNs.1:');
+        $classesAndCallNoQuery = Book::find()->query($this->buildQueryClassesAndCallNoArray($keywords))->explain($explain)->options($option);
+        \Yii::info($classesAndCallNoQuery->count(), __METHOD__ . '|classes.1 and call_no:');
+        $titleQuery = Book::find()->query($this->buildQueryTitleArray($keywords))->explain($explain)->options($option);
+        \Yii::info($titleQuery->count(), __METHOD__ . '|title:');
+        return [];
+    }
+
+    public function search($keywords, $config = [])
+    {
+        //$this->buildQuery($keywords, $config, false, $this->buildQueryOptions());
+        $queryArray = $this->buildQueryArray($keywords);
+        $query = Book::find()->query($queryArray)->explain(false)->options($this->buildQueryOptions());
+        $provider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+        return $provider;
     }
 }

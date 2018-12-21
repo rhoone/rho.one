@@ -108,7 +108,7 @@ class LibraryController extends \yii\console\Controller
         $class = get_class($library);
         $start = (int)$start;
         $count = (int)$count;
-
+        echo "Begin from $start...\r\n";
         $timestamp = time();
         $i = 0;
         foreach ($library->marcClass::find()->page($count, $start / $count)->orderBy(['marc_no' => SORT_ASC])->all() as $marc)

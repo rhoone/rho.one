@@ -15,29 +15,37 @@
  * Created by PhpStorm.
  * User: i
  * Date: 2018/12/21
- * Time: 0:12
+ * Time: 16:21
  */
 
 namespace common\rhoone\library\widgets;
 
 
 use yii\base\Widget;
+use yii\elasticsearch\ActiveDataProvider;
 
 /**
- * Class SearchResultItem
+ * Class SearchResultItems
  * @package common\rhoone\library\widgets
  */
-class SearchResultItem extends Widget
+class SearchResultItems extends Widget
 {
+    public $paginationConfig = [
+        //'page' => 0,
+        'pageParam' => 'library-page',
+        //'pageSize' => 10,
+        'pageSizeParam' => 'library-per-page',
+    ];
     /**
-     * @var 检索结果条目。
+     * @var ActiveDataProvider
      */
-    public $item;
+    public $provider;
 
     public function run()
     {
-        return $this->render('search-result-item', [
-            'item' => $this->item,
+        return $this->render('search-result-items', [
+            'provider' => $this->provider,
+            'paginationConfig' => $this->paginationConfig,
         ]);
     }
 }

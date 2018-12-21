@@ -21,6 +21,11 @@ return [
                 ['http_address' => 'inet[/web_elasticsearch_1:9200]',],
             ],
         ],
+        'urlManager' => [
+            'rules' => [
+                'about' => 'site/about',
+            ],
+        ],
     ],
     'modules' => [
         'rhoone' => [

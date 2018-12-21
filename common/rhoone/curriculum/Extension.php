@@ -31,7 +31,7 @@ class Extension extends ExternalExt
         return '同济大学课程';
     }
 
-    public function search($keywords)
+    public function search($keywords, $config = [])
     {
         return null;
     }
