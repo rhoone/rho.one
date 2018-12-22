@@ -19,6 +19,10 @@ CommonAsset::register($this);
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <?= Html::csrfMetaTags() ?>
         <title><?= Html::encode($this->title) ?></title>
+        <script>
+            var _czc = _czc || [];
+            // _czc.push(["_setAccount", "<?= isset(Yii::$app->params['cnzz']['siteId']) ? Yii::$app->params['cnzz']['siteId'] : 0 ?>"]);
+        </script>
         <?php $this->head() ?>
     </head>
     <body>
@@ -27,7 +31,7 @@ CommonAsset::register($this);
         <div class="wrap">
             <?php
             NavBar::begin([
-                'brandLabel' => 'rho.one',
+                'brandLabel' => 'Search in one',
                 'brandUrl' => Yii::$app->homeUrl,
                 'options' => [
                     'class' => 'navbar-inverse navbar-fixed-top',
@@ -62,7 +66,11 @@ CommonAsset::register($this);
                 <p class="pull-right"><a href="https://github.com/rhoone" target="_blank">rho.one</a> 提供技术支持</p>
             </div>
         </footer>
-
+        <?php if (isset(Yii::$app->params['cnzz']['code'])): ?>
+        <div class="hidden">
+            <?= Yii::$app->params['cnzz']['code'] ?>
+        </div>
+        <?php endif; ?>
         <?php $this->endBody() ?>
     </body>
 </html>

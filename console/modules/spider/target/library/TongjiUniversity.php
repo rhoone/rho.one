@@ -725,7 +725,7 @@ class TongjiUniversity extends LibraryTarget
                 'presses.1^3',
                 'marc_no^2',
                 'subjects.1^2',
-                //'books.position^1.2',
+                'books.position^1.2',
                 'books.status^1.2',
                 'books.barcode^3.8',
                 //'books.volume_period^1.2',
