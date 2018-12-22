@@ -1,7 +1,7 @@
 <?php
 /* @var $this yii\web\View */
 
-$this->title = 'My Yii Application';
+$this->title = 'Search in one';
 ?>
 <div class="site-index">
     <div class="row">
