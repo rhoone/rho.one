@@ -30,7 +30,7 @@ return [
                 'yii\bootstrap\BootstrapPluginAsset' => [
                     'sourcePath' => null,
                     'js' => [
-                        '//cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.js',
+                        '//cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js',
                     ],
                 ],
                 'rhoone\assets\NprogressAsset' => [
