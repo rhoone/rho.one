@@ -10,7 +10,10 @@ $params = array_merge(
 return [
     'id' => 'app-console',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'bootstrap' => [
+        'log',
+        'queue',
+    ],
     'controllerNamespace' => 'console\controllers',
     'components' => [
         'log' => [
@@ -20,6 +23,16 @@ return [
                     'levels' => ['error', 'warning'],
                 ],
             ],
+        ],
+        'queue' => [
+            'class' => \yii\queue\redis\Queue::class,
+            'as log' => \yii\queue\LogBehavior::class,
+            'redis' => 'redis_queue',
+        ],
+        'redis_queue' => [
+            'class' => \yii\redis\Connection::class,
+            'hostname' => 'redis_queue',
+            'database' => 13,
         ],
     ],
     'modules' => [

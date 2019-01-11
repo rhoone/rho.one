@@ -162,4 +162,27 @@ class LibraryController extends \yii\console\Controller
         $library = self::getTarget($target);
 
     }
+
+    /**
+     * Push download job into queue.
+     */
+    public function actionPush()
+    {
+        /* @var $queue \yii\queue\redis\Queue \*/
+        $queue = \Yii::$app->queue;
+        $queue->push(new \rhoone\spider\job\BatchDownloadJob([
+            'urlTemplate' => 'http://webpac.lib.tongji.edu.cn/asord/asord_hist.php?page={$page}',
+            'urlParameters' => $this->getPages(),
+        ]));
+    }
+
+    private function getPages()
+    {
+        $pages = [];
+        foreach (range(1, 334) as $i)
+        {
+            $pages[$i] = ['{$page}' => $i];
+        }
+        return $pages;
+    }
 }
