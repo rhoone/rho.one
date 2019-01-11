@@ -32,6 +32,9 @@
         "rhoone/rhoone-task": "dev-master",
         "rhoone/rhoone-feedback": "dev-master",
         "rhoone/rhoone-spider": "dev-master",
+        "rhoone/rhoone-library": "dev-master",
+        "rhoone/rhoone-library-huiwen": "dev-master",
+        "rhoone/rhoone-library-huiwen-tongjiuniversity": "dev-master",
         "yiisoft/yii2-elasticsearch": "2.1.x-dev"
     },
     "require-dev": {
