@@ -14,6 +14,8 @@ namespace console\modules\spider\controllers;
 
 use console\modules\spider\target\library\LibraryTarget;
 use console\modules\spider\target\library\TongjiUniversity\models\search\Book;
+use yii\queue\ExecEvent;
+use yii\queue\Queue;
 
 /**
  * Library Spider
@@ -166,22 +168,38 @@ class LibraryController extends \yii\console\Controller
     /**
      * Push download job into queue.
      */
-    public function actionPush()
+    public function actionPush(int $start, int $count = 1)
     {
-        /* @var $queue \yii\queue\redis\Queue \*/
+        /* @var $queue \yii\queue\redis\Queue \ */
         $queue = \Yii::$app->queue;
-        $queue->push(new \rhoone\spider\job\BatchDownloadJob([
-            'urlTemplate' => 'http://webpac.lib.tongji.edu.cn/asord/asord_hist.php?page={$page}',
+        for ($i = $start; $i <= $start + $count - 1; $i++) {
+            $queue->push(new \rhoone\spider\job\DownloadToMongoDBJob([
+                'urlTemplate' => 'http://webpac.lib.tongji.edu.cn/opac/item.php?marc_no={%marc_no}',
+                'urlParameters' => [
+                    '{%marc_no}' => sprintf('%010s', (string) $i),
+                ],
+                'key' => sprintf('%010s', (string) $i),
+                'keyAttribute' => 'marc_no',
+                'modelClass' => \rhoone\library\providers\huiwen\targets\tongjiuniversity\models\DownloadedContent::class
+            ]));
+        }
+        /*
+        $queue->push(new \rhoone\spider\job\BatchDownloadToFileJob([
+            'urlTemplate' => 'http://webpac.lib.tongji.edu.cn/asord/asord_hist.php?page={%page}',
             'urlParameters' => $this->getPages(),
-        ]));
+            'filenameTemplate' => 'page_{%key}.html',
+            'destination' => [
+                'class' => \rhoone\spider\destinations\file\Destination::class,
+            ],
+        ]));*/
     }
 
     private function getPages()
     {
         $pages = [];
-        foreach (range(1, 334) as $i)
+        foreach (range(1, 3) as $i)
         {
-            $pages[$i] = ['{$page}' => $i];
+            $pages[$i] = ['{%page}' => $i];
         }
         return $pages;
     }
