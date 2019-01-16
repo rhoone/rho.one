@@ -73,6 +73,14 @@ return [
                 'about' => 'site/about',
             ],
         ],
+        'mongodb' => [
+            'class' => \yii\mongodb\Connection::class,
+            'dsn' => 'mongodb://mongodb_library_tongjiuniversity:27017/tongjiuniversity',
+            'options' => [
+                'username' => 'owner',
+                'password' => '123456',
+            ],
+        ],
     ],
     'modules' => [
         'rhoone' => [
