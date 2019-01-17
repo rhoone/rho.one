@@ -180,7 +180,7 @@ class LibraryController extends \yii\console\Controller
                 ],
                 'key' => sprintf('%010s', (string) $i),
                 'keyAttribute' => 'marc_no',
-                'modelClass' => \rhoone\library\providers\huiwen\targets\tongjiuniversity\models\DownloadedContent::class
+                'modelClass' => \rhoone\library\providers\huiwen\targets\tongjiuniversity\models\mongodb\DownloadedContent::class
             ]));
         }
         /*

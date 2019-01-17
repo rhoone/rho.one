@@ -73,6 +73,13 @@ return [
                 'about' => 'site/about',
             ],
         ],
+        'db' => [
+            'class' => 'yii\db\Connection',
+            'dsn' => 'mysql:host=mysql_8;dbname=rho.one',
+            'username' => 'root',
+            'password' => '123456',
+            'charset' => 'utf8mb4',
+        ],
         'mongodb' => [
             'class' => \yii\mongodb\Connection::class,
             'dsn' => 'mongodb://mongodb_library_tongjiuniversity:27017/tongjiuniversity',
