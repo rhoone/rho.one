@@ -1,7 +1,7 @@
 <?php
 
 $config = [
-    'component' => [
+    'components' => [
         'request' => [
             'cookieValidationKey' => '1RH-m4EdB4bviYKtl2TajL0YiAQrckY8',
         ]
@@ -18,3 +18,5 @@ if (!YII_ENV_TEST) {
         'class' => 'yii\gii\Module',
     ];
 }
+
+return $config;
