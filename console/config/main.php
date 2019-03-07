@@ -34,6 +34,15 @@ return [
             'hostname' => 'redis_queue',
             'database' => 13,
         ],
+        'amqp_queue' => [
+            'class' => \yii\queue\amqp_interop\Queue::class,
+            'port' => 5672,
+            'user' => 'guest',
+            'password' => 'guest',
+            'queueName' => 'download_queue',
+            'driver' => \yii\queue\amqp_interop\Queue::ENQUEUE_AMQP_LIB,
+            'dsn' => 'amqp:',
+        ],
     ],
     'modules' => [
         'spider' => [
