@@ -166,16 +166,16 @@ class LibraryController extends \yii\console\Controller
     /**
      * Push job(s) to the queue.
      * @param int $start
-     * @param int $count
+     * @param int $end
      * @param int $min The minimum number of each batch.
      * @param int $max The maximum number of each batch.
      */
-    public function actionPush(int $start, int $count = 1, $min = 20, $max = 50)
+    public function actionPush(int $start, int $end = 1, $min = 20, $max = 50)
     {
         /* @var $queue \yii\queue\redis\Queue \ */
         $queue = \Yii::$app->queue;
         /*
-        for ($i = $start; $i <= $start + $count - 1; $i++) {
+        for ($i = $start; $i <= $start + $end - 1; $i++) {
             $queue->push(new \rhoone\spider\job\DownloadToMongoDBJob([
                 'urlTemplate' => 'http://webpac.lib.tongji.edu.cn/opac/item.php?marc_no={%marc_no}',
                 'urlParameters' => [
@@ -187,7 +187,7 @@ class LibraryController extends \yii\console\Controller
             ]));
         }
         */
-        for ($i = $start; $batch = rand($min, $max), $batch = ($batch < $count - $i + 1) ? $batch : ($count - $i + 1), $i <= $count; $i += $batch)
+        for ($i = $start; $batch = rand($min, $max), $batch = ($batch < $end - $i + 1) ? $batch : ($end - $i + 1), $i <= $end; $i += $batch)
         {
             $urlParameters = [];
             for ($j = 0; $j < $batch; $j++)
