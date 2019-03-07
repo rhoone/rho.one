@@ -14,8 +14,6 @@ namespace console\modules\spider\controllers;
 
 use console\modules\spider\target\library\LibraryTarget;
 use console\modules\spider\target\library\TongjiUniversity\models\search\Book;
-use yii\queue\ExecEvent;
-use yii\queue\Queue;
 
 /**
  * Library Spider
@@ -166,12 +164,17 @@ class LibraryController extends \yii\console\Controller
     }
 
     /**
-     * Push download job into queue.
+     * Push job(s) to the queue.
+     * @param int $start
+     * @param int $count
+     * @param int $min The minimum number of each batch.
+     * @param int $max The maximum number of each batch.
      */
-    public function actionPush(int $start, int $count = 1)
+    public function actionPush(int $start, int $count = 1, $min = 20, $max = 50)
     {
         /* @var $queue \yii\queue\redis\Queue \ */
         $queue = \Yii::$app->queue;
+        /*
         for ($i = $start; $i <= $start + $count - 1; $i++) {
             $queue->push(new \rhoone\spider\job\DownloadToMongoDBJob([
                 'urlTemplate' => 'http://webpac.lib.tongji.edu.cn/opac/item.php?marc_no={%marc_no}',
@@ -183,6 +186,23 @@ class LibraryController extends \yii\console\Controller
                 'modelClass' => \rhoone\library\providers\huiwen\targets\tongjiuniversity\models\mongodb\DownloadedContent::class
             ]));
         }
+        */
+        for ($i = $start; $batch = rand($min, $max), $batch = ($batch < $count - $i + 1) ? $batch : ($count - $i + 1), $i <= $count; $i += $batch)
+        {
+            var_dump($i);
+            var_dump($batch);
+            $urlParameters = [];
+            for ($j = 0; $j < $batch; $j++)
+            {
+                $urlParameters[$i + $j] = [];
+                $urlParameters[$i + $j]['{%marc_no}'] = sprintf('%010s', (string) $i + $j);
+            }
+            $queue->push(new \rhoone\library\providers\huiwen\targets\tongjiuniversity\job\BatchDownloadToMongoDBJob([
+                'urlParameters' => $urlParameters,
+                //'target' => \rhoone\library\providers\huiwen\targets\tongjiuniversity\targets\MarcTarget::class,
+            ]));
+        }
+
         /*
         $queue->push(new \rhoone\spider\job\BatchDownloadToFileJob([
             'urlTemplate' => 'http://webpac.lib.tongji.edu.cn/asord/asord_hist.php?page={%page}',
