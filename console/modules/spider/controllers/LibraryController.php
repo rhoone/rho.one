@@ -189,17 +189,14 @@ class LibraryController extends \yii\console\Controller
         */
         for ($i = $start; $batch = rand($min, $max), $batch = ($batch < $count - $i + 1) ? $batch : ($count - $i + 1), $i <= $count; $i += $batch)
         {
-            var_dump($i);
-            var_dump($batch);
             $urlParameters = [];
             for ($j = 0; $j < $batch; $j++)
             {
-                $urlParameters[$i + $j] = [];
-                $urlParameters[$i + $j]['{%marc_no}'] = sprintf('%010s', (string) $i + $j);
+                $urlParameters[sprintf('%010s', (string) $i + $j)] = [];
+                $urlParameters[sprintf('%010s', (string) $i + $j)]['{%marc_no}'] = sprintf('%010s', (string) $i + $j);
             }
             $queue->push(new \rhoone\library\providers\huiwen\targets\tongjiuniversity\job\BatchDownloadToMongoDBJob([
                 'urlParameters' => $urlParameters,
-                //'target' => \rhoone\library\providers\huiwen\targets\tongjiuniversity\targets\MarcTarget::class,
             ]));
         }
 
