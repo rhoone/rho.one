@@ -14,6 +14,7 @@ namespace console\modules\spider\controllers;
 
 use console\modules\spider\target\library\LibraryTarget;
 use console\modules\spider\target\library\TongjiUniversity\models\search\Book;
+use rhoone\library\providers\huiwen\targets\tongjiuniversity\models\mongodb\DownloadedContent;
 
 /**
  * Library Spider
@@ -209,6 +210,37 @@ class LibraryController extends \yii\console\Controller
                 'class' => \rhoone\spider\destinations\file\Destination::class,
             ],
         ]));*/
+    }
+
+    /**
+     * @param int $start
+     * @param int $end
+     * @return int
+     */
+    public function actionCheckContinuity(int $start, int $end)
+    {
+        $list = [];
+        for ($i = $start; $i <= $end; $i++)
+        {
+            $marc_no = sprintf('%010s', (string) $i);
+            if (!DownloadedContent::find()->where(['marc_no' => $marc_no])->exists())
+            {
+                $list[] = $marc_no;
+            }
+            printf("progress: [%-50s] %d%% Done.\r", str_repeat('#', ($i - $start + 1) / ($end - $start + 1) * 50), ($i - $start + 1) / ($end - $start + 1) * 100);
+        }
+        file_put_contents("php://stdout", "\n");
+        if (empty($list)) {
+            file_put_contents("php://stdout", "No omission.\n");
+            return 0;
+        }
+        $count = count($list);
+        file_put_contents("php://stdout", "$count omissions. The list is as follows:\n");
+        foreach ($list as $marc_no)
+        {
+            file_put_contents("php://stdout", $marc_no . "\n");
+        }
+        return 0;
     }
 
     private function getPages()
