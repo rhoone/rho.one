@@ -63,7 +63,11 @@ CommonAsset::register($this);
             <div class="container">
                 <p class="pull-left">&copy; vistart <?= date('Y') ?></p>
 
-                <p class="pull-right"><a href="https://github.com/rhoone" target="_blank">rho.one</a> 提供技术支持</p>
+                <p class="pull-right">
+                    <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=31011402005634"><img src="<?= Yii::$app->assetManager->getPublishedUrl("@common/assets/common") ?>/img/public-security.png" style="float:left;"/>沪公网安备 31011402005634号</a>
+                    &nbsp;
+                    <a href="http://www.miitbeian.gov.cn" target="_blank">沪ICP备14009001号-5</a>
+                </p>
             </div>
         </footer>
         <?php if (isset(Yii::$app->params['cnzz']['code'])): ?>
