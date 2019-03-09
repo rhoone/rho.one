@@ -231,11 +231,11 @@ class LibraryController extends \yii\console\Controller
         }
         file_put_contents("php://stdout", "\n");
         if (empty($list)) {
-            file_put_contents("php://stdout", "No omission.\n");
+            file_put_contents("php://stdout", "No omissions.\n");
             return 0;
         }
         $count = count($list);
-        file_put_contents("php://stdout", "$count omissions. The list is as follows:\n");
+        file_put_contents("php://stdout", "$count omission(s). The list is as follows:\n");
         foreach ($list as $marc_no)
         {
             file_put_contents("php://stdout", $marc_no . "\n");
