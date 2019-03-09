@@ -18,19 +18,19 @@ return [
                 'yii\web\JqueryAsset' => [
                     'sourcePath' => null,
                     'js' => [
-                        '//cdn.bootcss.com/jquery/3.2.1/jquery.min.js',
+                        '//cdn.bootcss.com/jquery/3.3.1/jquery.min.js',
                     ],
                 ],
                 'yii\bootstrap\BootstrapAsset' => [
                     'sourcePath' => null,
                     'css' => [
-                        '//cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css',
+                        '//cdn.bootcss.com/twitter-bootstrap/3.4.1/css/bootstrap.min.css',
                     ],
                 ],
                 'yii\bootstrap\BootstrapPluginAsset' => [
                     'sourcePath' => null,
                     'js' => [
-                        '//cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js',
+                        '//cdn.bootcss.com/twitter-bootstrap/3.4.1/js/bootstrap.min.js',
                     ],
                 ],
                 'rhoone\assets\NprogressAsset' => [
