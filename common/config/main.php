@@ -77,7 +77,7 @@ return [
             'class' => 'yii\db\Connection',
             'dsn' => 'mysql:host=mysql_8;dbname=rho.one',
             'username' => 'root',
-            'password' => 'dwCmWr',
+            'password' => '123456',
             'charset' => 'utf8mb4',
         ],
         'mongodb' => [
