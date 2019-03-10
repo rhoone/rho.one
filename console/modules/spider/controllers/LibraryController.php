@@ -171,10 +171,10 @@ class LibraryController extends \yii\console\Controller
      * @param int $min The minimum number of each batch.
      * @param int $max The maximum number of each batch.
      */
-    public function actionPush(int $start, int $end = 1, $min = 20, $max = 50)
+    public function actionPushDownload(int $start, int $end = 1, $min = 20, $max = 50)
     {
         /* @var $queue \yii\queue\redis\Queue \ */
-        $queue = \Yii::$app->queue;
+        $queue = \Yii::$app->queue_downloading;
         /*
         for ($i = $start; $i <= $start + $end - 1; $i++) {
             $queue->push(new \rhoone\spider\job\DownloadToMongoDBJob([
@@ -196,6 +196,13 @@ class LibraryController extends \yii\console\Controller
                 $urlParameters[sprintf('%010s', (string) $i + $j)] = [];
                 $urlParameters[sprintf('%010s', (string) $i + $j)]['{%marc_no}'] = sprintf('%010s', (string) $i + $j);
             }
+            /*
+             * $urlParameters['0000000001']['{%marc_no}'] = ['0000000001']
+             * The first dimension of the array is the key of the download task.
+             * The second dimension of the array is the list of parameters for the download task, and the array value is
+             * the value of the parameter.
+             *
+             */
             $queue->push(new \rhoone\library\providers\huiwen\targets\tongjiuniversity\job\BatchDownloadToMongoDBJob([
                 'urlParameters' => $urlParameters,
             ]));
@@ -217,7 +224,7 @@ class LibraryController extends \yii\console\Controller
      * @param int $end
      * @return int
      */
-    public function actionCheckContinuity(int $start, int $end)
+    public function actionCheckContinuityDownload(int $start, int $end)
     {
         $list = [];
         for ($i = $start; $i <= $end; $i++)
@@ -240,6 +247,16 @@ class LibraryController extends \yii\console\Controller
         {
             file_put_contents("php://stdout", $marc_no . "\n");
         }
+        return 0;
+    }
+
+    /**
+     * @param int $start
+     * @param int $end
+     * @return int
+     */
+    public function actionPushAnalyze(int $start, int $end)
+    {
         return 0;
     }
 
