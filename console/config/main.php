@@ -12,7 +12,9 @@ return [
     'basePath' => dirname(__DIR__),
     'bootstrap' => [
         'log',
-        'queue',
+        'queue_downloading',
+        'queue_analyzing',
+        'queue_indexing',
     ],
     'controllerNamespace' => 'console\controllers',
     'components' => [
@@ -24,15 +26,35 @@ return [
                 ],
             ],
         ],
-        'queue' => [
+        'queue_downloading' => [
             'class' => \yii\queue\redis\Queue::class,
             'as log' => \yii\queue\LogBehavior::class,
-            'redis' => 'redis_queue',
+            'redis' => 'redis_queue_downloading',
         ],
-        'redis_queue' => [
+        'queue_analyzing' => [
+            'class' => \yii\queue\redis\Queue::class,
+            'as log' => \yii\queue\LogBehavior::class,
+            'redis' => 'redis_queue_analyzing',
+        ],
+        'queue_indexing' => [
+            'class' => \yii\queue\redis\Queue::class,
+            'as log' => \yii\queue\LogBehavior::class,
+            'redis' => 'redis_queue_indexing',
+        ],
+        'redis_queue_downloading' => [
             'class' => \yii\redis\Connection::class,
             'hostname' => 'redis_queue',
             'database' => 13,
+        ],
+        'redis_queue_analyzing' => [
+            'class' => \yii\redis\Connection::class,
+            'hostname' => 'redis_queue',
+            'database' => 14,
+        ],
+        'redis_queue_indexing' => [
+            'class' => \yii\redis\Connection::class,
+            'hostname' => 'redis_queue',
+            'database' => 15,
         ],
         'amqp_queue' => [
             'class' => \yii\queue\amqp_interop\Queue::class,
