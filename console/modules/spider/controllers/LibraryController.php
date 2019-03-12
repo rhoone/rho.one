@@ -255,8 +255,22 @@ class LibraryController extends \yii\console\Controller
      * @param int $end
      * @return int
      */
-    public function actionPushAnalyze(int $start, int $end)
+    public function actionPushAnalyze(int $start, int $end, $min = 1000, $max = 3000)
     {
+        /* @var $queue \yii\queue\redis\Queue */
+        $queue = \Yii::$app->queue_analyzing;
+        for ($i = $start; $batch = rand($min, $max), $batch = ($batch < $end - $i + 1) ? $batch : ($end - $i + 1), $i <= $end; $i += $batch)
+        {
+            $marcNos = [];
+            for ($j = 0; $j < $batch; $j++)
+            {
+                $marcNos[$i + $j] = sprintf('%010s', (string) $i + $j);
+            }
+            $queue->push(new \rhoone\library\providers\huiwen\targets\tongjiuniversity\job\BatchAnalyzeToMongoDBJob([
+                'marcNos' => $marcNos
+            ]));
+            file_put_contents("php://stdout", count($marcNos) . " pushed, start from $i, batch is $j.\n");
+        }
         return 0;
     }
 
