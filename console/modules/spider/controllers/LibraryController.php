@@ -15,6 +15,7 @@ namespace console\modules\spider\controllers;
 use console\modules\spider\target\library\LibraryTarget;
 use console\modules\spider\target\library\TongjiUniversity\models\search\Book;
 use rhoone\library\providers\huiwen\targets\tongjiuniversity\models\mongodb\DownloadedContent;
+use rhoone\library\providers\huiwen\targets\tongjiuniversity\models\mongodb\MarcNo;
 
 /**
  * Library Spider
@@ -269,11 +270,52 @@ class LibraryController extends \yii\console\Controller
             $queue->push(new \rhoone\library\providers\huiwen\targets\tongjiuniversity\job\BatchAnalyzeToMongoDBJob([
                 'marcNos' => $marcNos
             ]));
-            file_put_contents("php://stdout", count($marcNos) . " pushed, start from $i, batch is $j.\n");
+            file_put_contents("php://stdout", count($marcNos) . " pushed, start from $i.\n");
         }
         return 0;
     }
 
+    public function actionCheckContinuityAnalyze(int $start, int $end)
+    {
+        $list = [];
+        for ($i = $start; $i<= $end; $i++)
+        {
+            $marc_no = sprintf('%010s', (string) $i);
+            if (!MarcNo::find()->marcNo($marc_no)->exists()) {
+                $list[] = $marc_no;
+            }
+            printf("progress: [%-50s] %d%% Done.\r", str_repeat('#', ($i - $start + 1) / ($end - $start + 1) * 50), ($i - $start + 1) / ($end - $start + 1) * 100);
+        }
+        file_put_contents("php://stdout", "\n");
+        if (empty($list)) {
+            file_put_contents("php://stdout", "No omissions.\n");
+            return 0;
+        }
+        $count = count($list);
+        file_put_contents("php://stdout", "$count omission(s). The list is as follows:\n");
+        foreach ($list as $marc_no)
+        {
+            file_put_contents("php://stdout", $marc_no . "\n");
+        }
+        return 0;
+    }
+
+    public function actionTest()
+    {
+        $marcNo = MarcNo::getOneOrCreate('0000000001');
+        var_dump($marcNo->error_indexing);
+        $marcNo->error_indexing = false;
+        var_dump($marcNo->error_indexing);
+        if (!$marcNo->save()) {
+            var_dump($marcNo->errors);
+        }
+        var_dump($marcNo->error_indexing);
+        return 0;
+    }
+
+    /**
+     * @return array
+     */
     private function getPages()
     {
         $pages = [];
