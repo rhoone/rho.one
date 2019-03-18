@@ -40,7 +40,7 @@
         "yiisoft/yii2-elasticsearch": "2.1.x-dev"
     },
     "require-dev": {
-        "yiisoft/yii2-debug": "^2.0.14",
+        "yiisoft/yii2-debug": "^2.1.0",
         "yiisoft/yii2-gii": "^2.0.8",
         "yiisoft/yii2-faker": "^2.0.4",
         "codeception/base": "^2.5.4",
