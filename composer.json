@@ -7,9 +7,9 @@
     "license": "AGPL-3.0-or-later",
     "minimum-stability": "stable",
     "require": {
-        "php": ">=7.2.7",
+        "php": ">=7.2.15",
         "ext-json": "*",
-        "yiisoft/yii2": ">=2.0.16.1",
+        "yiisoft/yii2": ">=2.0.17",
         "yiisoft/yii2-bootstrap": "^2.0.9",
         "yiisoft/yii2-composer": "^2.0.7",
         "yiisoft/yii2-swiftmailer": "^2.1.2",
@@ -40,7 +40,7 @@
         "yiisoft/yii2-elasticsearch": "2.1.x-dev"
     },
     "require-dev": {
-        "yiisoft/yii2-debug": "^2.1.0",
+        "yiisoft/yii2-debug": "^2.1.1",
         "yiisoft/yii2-gii": "^2.1.0",
         "yiisoft/yii2-faker": "^2.0.4",
         "codeception/base": "^2.5.4",
