@@ -65,7 +65,7 @@ return [
         'elasticsearch' => [
             'class' => 'yii\elasticsearch\Connection',
             'nodes' => [
-                ['http_address' => 'inet[/elasticsearch:9200]',],
+                ['http_address' => 'inet[/web_elasticsearch_1:9200]',],
             ],
         ],
         'urlManager' => [
