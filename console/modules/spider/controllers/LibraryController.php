@@ -14,6 +14,7 @@ namespace console\modules\spider\controllers;
 
 use console\modules\spider\target\library\LibraryTarget;
 use console\modules\spider\target\library\TongjiUniversity\models\search\Book;
+use rhoone\library\providers\huiwen\targets\tongjiuniversity\models\elasticsearch\Marc;
 use rhoone\library\providers\huiwen\targets\tongjiuniversity\models\mongodb\DownloadedContent;
 use rhoone\library\providers\huiwen\targets\tongjiuniversity\models\mongodb\MarcNo;
 
@@ -147,16 +148,21 @@ class LibraryController extends \yii\console\Controller
         $library->bookSearchClass::updateMapping();
     }
 
-    public function actionClearSearchIndex($target)
+    public function actionClearDocuments()
     {
-        $library = self::getTarget($target);
-        $bookSearch = $library->bookSearchClass::deleteAll();
+        $result = Marc::deleteAll();
+        file_put_contents("php://stdout", $result . " document(s) deleted.\n");
+        return true;
     }
 
-    public function actionCreateSearchIndex($target)
+    public function actionCreateSearchIndex()
     {
-        $library = self::getTarget($target);
-        $library->bookSearchClass::createIndex();
+        return Marc::createIndex();
+    }
+
+    public function actionDeleteSearchIndex()
+    {
+        return Marc::deleteIndex();
     }
 
     public function actionSearch($target)
@@ -172,7 +178,7 @@ class LibraryController extends \yii\console\Controller
      * @param int $min The minimum number of each batch.
      * @param int $max The maximum number of each batch.
      */
-    public function actionPushDownload(int $start, int $end = 1, $min = 20, $max = 50)
+    public function actionPushDownload(int $start, int $end = 1, int $min = 20, int $max = 50)
     {
         /* @var $queue \yii\queue\redis\Queue \ */
         $queue = \Yii::$app->queue_downloading;
@@ -256,7 +262,7 @@ class LibraryController extends \yii\console\Controller
      * @param int $end
      * @return int
      */
-    public function actionPushAnalyze(int $start, int $end, $min = 1000, $max = 3000)
+    public function actionPushAnalyze(int $start, int $end, int $min = 1000, int $max = 3000)
     {
         /* @var $queue \yii\queue\redis\Queue */
         $queue = \Yii::$app->queue_analyzing;
@@ -282,6 +288,50 @@ class LibraryController extends \yii\console\Controller
         {
             $marc_no = sprintf('%010s', (string) $i);
             if (!MarcNo::find()->marcNo($marc_no)->exists()) {
+                $list[] = $marc_no;
+            }
+            printf("progress: [%-50s] %d%% Done.\r", str_repeat('#', ($i - $start + 1) / ($end - $start + 1) * 50), ($i - $start + 1) / ($end - $start + 1) * 100);
+        }
+        file_put_contents("php://stdout", "\n");
+        if (empty($list)) {
+            file_put_contents("php://stdout", "No omissions.\n");
+            return 0;
+        }
+        $count = count($list);
+        file_put_contents("php://stdout", "$count omission(s). The list is as follows:\n");
+        foreach ($list as $marc_no)
+        {
+            file_put_contents("php://stdout", $marc_no . "\n");
+        }
+        return 0;
+    }
+
+    public function actionPushIndex(int $start, int $end, int $min = 1000, int $max = 3000)
+    {
+        /* @var $queue \yii\queue\redis\Queue */
+        $queue = \Yii::$app->queue_indexing;
+        for ($i = $start; $batch = rand($min, $max), $batch = ($batch < $end - $i + 1) ? $batch : ($end - $i + 1), $i <= $end; $i += $batch)
+        {
+            $marcNos = [];
+            for ($j = 0; $j < $batch; $j++)
+            {
+                $marcNos[$i + $j] = sprintf('%010s', (string) $i + $j);
+            }
+            $queue->push(new \rhoone\library\providers\huiwen\targets\tongjiuniversity\job\BatchIndexToElasticSearchJob([
+                'marcNos' => $marcNos
+            ]));
+            file_put_contents("php://stdout", count($marcNos) . " pushed, start from $i.\n");
+        }
+        return 0;
+    }
+
+    public function actionCheckContinuityIndex(int $start, int $end)
+    {
+        $list = [];
+        for ($i = $start; $i<= $end; $i++)
+        {
+            $marc_no = sprintf('%010s', (string) $i);
+            if (!Marc::find()->marcNo($marc_no)->exists() && !(MarcNo::find()->marcNo($marc_no)->exists() && MarcNo::find()->marcNo($marc_no)->one()->isEmpty)) {
                 $list[] = $marc_no;
             }
             printf("progress: [%-50s] %d%% Done.\r", str_repeat('#', ($i - $start + 1) / ($end - $start + 1) * 50), ($i - $start + 1) / ($end - $start + 1) * 100);
