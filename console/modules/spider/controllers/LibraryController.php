@@ -291,11 +291,14 @@ class LibraryController extends \yii\console\Controller
     public function actionCheckContinuityAnalyze(int $start, int $end)
     {
         $list = [];
+        $non_synced = [];
         for ($i = $start; $i<= $end; $i++)
         {
             $marc_no = sprintf('%010s', (string) $i);
-            if (!MarcNo::find()->marcNo($marc_no)->exists() || !MarcNo::find()->marcNo($marc_no)->one()->empty) {
+            if (!MarcNo::find()->marcNo($marc_no)->exists()) {
                 $list[] = $marc_no;
+            } elseif (MarcNo::find()->marcNo($marc_no)->one()->empty == MarcStatus::find()->marcNo($marc_no)->exists()) {
+                $non_synced[] = $marc_no;
             }
             printf("progress: [%-50s] %d%% Done.\r", str_repeat('#', ($i - $start + 1) / ($end - $start + 1) * 50), ($i - $start + 1) / ($end - $start + 1) * 100);
         }
@@ -307,6 +310,12 @@ class LibraryController extends \yii\console\Controller
         $count = count($list);
         file_put_contents("php://stdout", "$count omission(s). The list is as follows:\n");
         foreach ($list as $marc_no)
+        {
+            file_put_contents("php://stdout", $marc_no . "\n");
+        }
+        $count = count($non_synced);
+        file_put_contents("php://stdout", "$count failed. The list is as follows:\n");
+        foreach ($non_synced as $marc_no)
         {
             file_put_contents("php://stdout", $marc_no . "\n");
         }
