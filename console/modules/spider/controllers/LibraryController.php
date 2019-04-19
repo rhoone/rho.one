@@ -150,7 +150,13 @@ class LibraryController extends \yii\console\Controller
 
     public function actionClearDocuments()
     {
-        $result = Marc::deleteAll();
+        $result = 0;
+        while (Marc::find()->one()) {
+            $result += Marc::find()->one()->delete();
+            if ($result % 100 == 0) {
+                file_put_contents("php://stdout", "$result deleted.\n");
+            }
+        }
         file_put_contents("php://stdout", $result . " document(s) deleted.\n");
         return true;
     }
@@ -227,6 +233,7 @@ class LibraryController extends \yii\console\Controller
     }
 
     /**
+     * Check the continuity of downloaded content.
      * @param int $start
      * @param int $end
      * @return int

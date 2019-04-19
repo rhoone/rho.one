@@ -18,7 +18,6 @@
         "yiisoft/yii2-mongodb": "^2.1.7",
         "ezyang/htmlpurifier": "^4.10.0",
         "rhosocial/yii2-oauth2client": "dev-master",
-        "sunra/php-simple-html-dom-parser": "*",
         "rhosocial/yii2-user": "dev-master",
         "bower-asset/bootstrap": "^3.4.1",
         "bower-asset/jquery": "^3.3.1",
