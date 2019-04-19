@@ -294,7 +294,7 @@ class LibraryController extends \yii\console\Controller
         for ($i = $start; $i<= $end; $i++)
         {
             $marc_no = sprintf('%010s', (string) $i);
-            if (!MarcNo::find()->marcNo($marc_no)->exists()) {
+            if (!MarcNo::find()->marcNo($marc_no)->exists() || !MarcNo::find()->marcNo($marc_no)->one()->empty) {
                 $list[] = $marc_no;
             }
             printf("progress: [%-50s] %d%% Done.\r", str_repeat('#', ($i - $start + 1) / ($end - $start + 1) * 50), ($i - $start + 1) / ($end - $start + 1) * 100);
@@ -338,7 +338,7 @@ class LibraryController extends \yii\console\Controller
         for ($i = $start; $i<= $end; $i++)
         {
             $marc_no = sprintf('%010s', (string) $i);
-            if (!Marc::find()->marcNo($marc_no)->exists() && !(MarcNo::find()->marcNo($marc_no)->exists() && MarcNo::find()->marcNo($marc_no)->one()->isEmpty)) {
+            if (!Marc::find()->marcNo($marc_no)->exists() && !(MarcNo::find()->marcNo($marc_no)->exists() && MarcNo::find()->marcNo($marc_no)->one()->empty)) {
                 $list[] = $marc_no;
             }
             printf("progress: [%-50s] %d%% Done.\r", str_repeat('#', ($i - $start + 1) / ($end - $start + 1) * 50), ($i - $start + 1) / ($end - $start + 1) * 100);
